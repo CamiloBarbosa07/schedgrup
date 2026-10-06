@@ -235,6 +235,10 @@ body.dark-theme .topbar {
     font-family: var(--font-body);
 }
 
+.auth-actions [hidden] {
+    display: none;
+}
+
 .theme-switch {
     position: relative;
     display: inline-flex;
@@ -300,7 +304,7 @@ body.dark-theme .topbar {
 
 .btn-light {
     color: var(--negro);
-    background: var(--blanco);
+    background: transparent;
 }
 
 .btn-dark {
@@ -310,6 +314,57 @@ body.dark-theme .topbar {
 
 .btn-dark:hover {
     background: var(--verde-oscuro);
+}
+
+.btn-logout {
+    position: relative;
+    gap: 8px;
+    padding: 10px 4px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--verde-oscuro);
+    cursor: pointer;
+}
+
+.btn-logout::after {
+    position: absolute;
+    right: 0;
+    bottom: 4px;
+    left: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--verde-oscuro);
+    content: "";
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.2s ease;
+}
+
+.btn-logout:hover {
+    color: var(--verde-medio, var(--verde-oscuro));
+}
+
+.btn-logout:hover::after,
+.btn-logout:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.btn-logout:focus-visible {
+    outline: 2px solid var(--verde-oscuro);
+    outline-offset: 3px;
+}
+
+.btn-logout svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    background: transparent;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
 }
 
 .hero {
@@ -1244,6 +1299,10 @@ body.dark-theme .type-option.dinner:hover {
         border-radius: 9px;
         font-size: 0.78rem;
         white-space: nowrap;
+    }
+
+    .auth-actions #logoutButton {
+        grid-column: 2 / -1;
     }
 
     .hero {

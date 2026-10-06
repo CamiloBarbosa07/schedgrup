@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | Schedgrup</title>
+    <link rel="stylesheet" href="styles_login.css">
+</head>
+<body>
+    <label class="theme-switch" aria-label="Cambiar tema">
+        <input type="checkbox" id="themeToggle" aria-label="Cambiar tema">
+        <span class="theme-slider"></span>
+    </label>
+
+    <div class="theme-backdrop" aria-hidden="true"></div>
+
+    <div class="page-shell">
+        <div class="login-card">
+            <main class="form-panel">
+                <div class="panel-header">
+                    <p class="eyebrow eyebrow-dark" id="formEyebrow">Bienvenido de nuevo</p>
+                    <h1 id="formTitle">Iniciar sesión</h1>
+                    <p class="form-intro" id="formIntro">Ingresa tus datos para continuar con tu planificación.</p>
+                </div>
+
+                <form id="accountForm" class="login-form">
+                    <label class="field register-only" id="nameField" hidden>
+                        <span>Nombre</span>
+                        <input type="text" id="name" name="name" placeholder="Tu nombre" autocomplete="name">
+                    </label>
+
+                    <label class="field">
+                        <span>Correo electrónico</span>
+                        <input type="email" id="email" name="email" placeholder="nombre@correo.com" autocomplete="email" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Contraseña</span>
+                        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" minlength="8" required>
+                    </label>
+
+                    <label class="field register-only" id="confirmPasswordField" hidden>
+                        <span>Confirmar contraseña</span>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Repite tu contraseña" autocomplete="new-password" minlength="8">
+                    </label>
+
+                    <div class="inline-row" id="loginOptions">
+                        <label class="check-row">
+                            <input type="checkbox" id="rememberMe" name="rememberMe">
+                            <span>Recuérdame</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-button" id="submitButton">Iniciar sesión</button>
+                </form>
+
+                <p id="loginStatus" class="login-status" aria-live="polite"></p>
+            </main>
+
+            <aside class="brand-panel" aria-label="Cambiar a crear cuenta" role="button" tabindex="0" aria-pressed="false">
+                <div class="brand-content">
+                    <span class="brand-mark">Schedgrup</span>
+                    <p class="brand-kicker" id="brandKicker">¿Primera vez aquí?</p>
+                    <h2 id="brandTitle">Crear<br>Cuenta</h2>
+                    <p class="brand-copy" id="brandCopy">Organiza tu semana y guarda tus comidas en un solo lugar.</p>
+                    <span class="panel-hint">
+                        <span id="modeToggleText">Haz clic en este panel</span>
+                        <span aria-hidden="true">→</span>
+                    </span>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('accountForm');
+            const status = document.getElementById('loginStatus');
+            const nameField = document.getElementById('nameField');
+            const confirmPasswordField = document.getElementById('confirmPasswordField');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const brandPanel = document.querySelector('.brand-panel');
+            const brandContent = document.querySelector('.brand-content');
+            const formPanel = document.querySelector('.form-panel');
+            const themeToggle = document.getElementById('themeToggle');
+            const darkPalettes = ['forest', 'original', 'olive'];
+            const savedDarkPalette = localStorage.getItem('schedgrup-dark-palette');
+            document.body.dataset.darkPalette = darkPalettes.includes(savedDarkPalette) ? savedDarkPalette : 'forest';
+            let themeTransitionTimer;
+
+            const applyTheme = (isDark) => {
+                window.clearTimeout(themeTransitionTimer);
+                document.body.classList.add('theme-transitioning');
+                document.body.classList.toggle('dark-theme', isDark);
+                themeToggle.checked = isDark;
+                localStorage.setItem('schedgrup-theme', isDark ? 'dark' : 'light');
+
+                themeTransitionTimer = window.setTimeout(() => {
+                    document.body.classList.remove('theme-transitioning');
+                }, 720);
+            };
+
+            applyTheme(localStorage.getItem('schedgrup-theme') === 'dark');
+            themeToggle.addEventListener('change', () => {
+                applyTheme(themeToggle.checked);
+            });
+
+            let isRegisterMode = false;
+
+            const showStatus = (message, isError = false) => {
+                status.textContent = message;
+                status.classList.toggle('error', isError);
+            };
+
+            const toggleAccountMode = () => {
+                isRegisterMode = !isRegisterMode;
+                document.querySelector('.login-card').classList.toggle('is-registering', isRegisterMode);
+                brandPanel.setAttribute('aria-pressed', String(isRegisterMode));
+                const registerFields = [nameField, confirmPasswordField];
+                registerFields.forEach((field) => {
+                    field.hidden = !isRegisterMode;
+                    field.querySelector('input').required = isRegisterMode;
+                });
+
+                document.getElementById('formEyebrow').textContent = isRegisterMode ? 'Únete a Schedgrup' : 'Bienvenido de nuevo';
+                document.getElementById('formTitle').textContent = isRegisterMode ? 'Crear cuenta' : 'Iniciar sesión';
+                document.getElementById('formIntro').textContent = isRegisterMode
+                    ? 'Crea tu perfil para guardar tu planificación semanal.'
+                    : 'Ingresa tus datos para continuar con tu planificación.';
+                document.getElementById('submitButton').textContent = isRegisterMode ? 'Crear cuenta' : 'Iniciar sesión';
+                document.getElementById('brandKicker').textContent = isRegisterMode ? '¿Ya tienes una cuenta?' : '¿Primera vez aquí?';
+                document.getElementById('brandTitle').textContent = isRegisterMode ? 'Iniciar\nSesión' : 'Crear\nCuenta';
+                document.getElementById('brandCopy').textContent = isRegisterMode
+                    ? 'Qué bueno tenerte de vuelta. Continúa organizando tu semana.'
+                    : 'Organiza tu semana y guarda tus comidas en un solo lugar.';
+                document.getElementById('modeToggleText').textContent = isRegisterMode ? 'Haz clic para volver' : 'Haz clic en este panel';
+                brandPanel.setAttribute('aria-label', isRegisterMode ? 'Cambiar a iniciar sesión' : 'Cambiar a crear cuenta');
+                document.getElementById('loginOptions').hidden = isRegisterMode;
+                passwordInput.autocomplete = isRegisterMode ? 'new-password' : 'current-password';
+                brandContent.classList.remove('is-text-transitioning');
+                void brandContent.offsetWidth;
+                brandContent.classList.add('is-text-transitioning');
+                formPanel.classList.remove('is-text-transitioning');
+                void formPanel.offsetWidth;
+                formPanel.classList.add('is-text-transitioning');
+                showStatus('');
+            };
+
+            brandPanel.addEventListener('click', toggleAccountMode);
+            brandPanel.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleAccountMode();
+                }
+            });
+
+            const hashPassword = async (password) => {
+                if (!window.crypto || !window.crypto.subtle) {
+                    throw new Error('El navegador no permite proteger la contraseña en este contexto. Abre el sitio mediante HTTPS o localhost.');
+                }
+
+                const encodedPassword = new TextEncoder().encode(password);
+                const hash = await window.crypto.subtle.digest('SHA-256', encodedPassword);
+                return Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('');
+            };
+
+            const readAccounts = () => {
+                const savedAccounts = localStorage.getItem('schedgrup-accounts');
+                if (!savedAccounts) {
+                    return [];
+                }
+
+                const accounts = JSON.parse(savedAccounts);
+                if (!Array.isArray(accounts)) {
+                    throw new Error('No se pudieron leer las cuentas guardadas.');
+                }
+
+                return accounts;
+            };
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const email = document.getElementById('email').value.trim();
+                const password = passwordInput.value;
+
+                if (!form.reportValidity()) {
+                    return;
+                }
+
+                try {
+                    const accounts = readAccounts();
+                    const normalizedEmail = email.toLowerCase();
+                    let account;
+
+                    if (isRegisterMode) {
+                        const name = document.getElementById('name').value.trim();
+                        if (password !== confirmPasswordInput.value) {
+                            showStatus('Las contraseñas no coinciden.', true);
+                            return;
+                        }
+
+                        if (accounts.some((savedAccount) => savedAccount.email === normalizedEmail)) {
+                            showStatus('Ya existe una cuenta con ese correo.', true);
+                            return;
+                        }
+
+                        account = {
+                            id: Date.now().toString(),
+                            name,
+                            email: normalizedEmail,
+                            username: normalizedEmail.split('@')[0],
+                            passwordHash: await hashPassword(password)
+                        };
+                        accounts.push(account);
+                        localStorage.setItem('schedgrup-accounts', JSON.stringify(accounts));
+                    } else {
+                        const passwordHash = await hashPassword(password);
+                        account = accounts.find((savedAccount) =>
+                            savedAccount.email === normalizedEmail && savedAccount.passwordHash === passwordHash
+                        );
+
+                        if (!account) {
+                            showStatus('Correo o contraseña incorrectos.', true);
+                            return;
+                        }
+                    }
+
+                    const userProfile = {
+                        id: account.id,
+                        name: account.name,
+                        email: account.email,
+                        username: account.username,
+                        loggedInAt: new Date().toISOString()
+                    };
+                    const sessionStore = document.getElementById('rememberMe').checked
+                        ? localStorage
+                        : window.sessionStorage;
+                    [localStorage, window.sessionStorage].forEach((storage) => {
+                        storage.removeItem('schedgrup-user');
+                        storage.removeItem('schedgrup-session');
+                    });
+                    sessionStore.setItem('schedgrup-user', JSON.stringify(userProfile));
+                    sessionStore.setItem('schedgrup-session', JSON.stringify(userProfile));
+                    showStatus(isRegisterMode ? 'Cuenta creada correctamente.' : 'Inicio de sesión correcto.');
+
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                } catch (error) {
+                    showStatus(error.message || 'Ocurrió un error al procesar la cuenta.', true);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -37,9 +37,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
             applyDarkPalette();
 
+            const getAuthenticatedUser = () => {
+                const candidates = [
+                    localStorage.getItem('schedgrup-user'),
+                    localStorage.getItem('schedgrup-session'),
+                    sessionStorage.getItem('schedgrup-user'),
+                    sessionStorage.getItem('schedgrup-session')
+                ];
+
+                for (const candidate of candidates) {
+                    if (!candidate) continue;
+
+                    try {
+                        const parsed = JSON.parse(candidate);
+                        if (parsed && (parsed.email || parsed.username || parsed.id)) {
+                            return parsed;
+                        }
+                    } catch (error) {
+                        // Ignored: if the stored value is not JSON, it is treated as unauthenticated.
+                    }
+                }
+
+                return null;
+            };
+
+            const getMealsStorageKey = () => {
+                const user = getAuthenticatedUser();
+                if (!user) {
+                    return null;
+                }
+
+                return `schedgrupMeals:${user.email || user.username || user.id}`;
+            };
+
+            const loadMeals = () => {
+                const mealStorageKey = getMealsStorageKey();
+
+                if (!mealStorageKey) {
+                    localStorage.removeItem('schedgrupMeals');
+                    return [];
+                }
+
+                const storedMeals = localStorage.getItem(mealStorageKey);
+                return storedMeals ? JSON.parse(storedMeals) : [];
+            };
+
+            const persistMeals = (nextMeals) => {
+                const mealStorageKey = getMealsStorageKey();
+
+                if (!mealStorageKey) {
+                    localStorage.removeItem('schedgrupMeals');
+                    return;
+                }
+
+                localStorage.setItem(mealStorageKey, JSON.stringify(nextMeals));
+            };
+
             let selectedMeal = 'breakfast';
             let editingIndex = null;
-            let meals = JSON.parse(localStorage.getItem('schedgrupMeals') || '[]');
+            let meals = loadMeals();
 
             const updateSelectedMeal = (mealKey) => {
                 selectedMeal = mealKey;
@@ -128,12 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                localStorage.setItem('schedgrupMeals', JSON.stringify(meals));
+                persistMeals(meals);
                 renderMeals();
                 mealForm.reset();
                 foodInput.focus();
                 editingIndex = null;
-                updateSelectedMeal('breakfast');
             };
 
             mealForm.addEventListener('submit', (event) => {
@@ -748,4 +803,3 @@ ultimaSeccion.insertBefore(
     botonMenu,
     ultimaSeccion.children[1]
 );
-

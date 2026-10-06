@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schedgrup</title>
-    <link rel="stylesheet" href="styles_inicio.css">
+    <link rel="stylesheet" href="styles_index.css">
 </head>
 <body id="top">
     <header class="topbar">
@@ -23,8 +23,14 @@
                 <input type="checkbox" id="themeToggle" aria-label="Cambiar tema">
                 <span class="slider"></span>
             </label>
-            <a class="btn btn-light" href="inicio_sesion.html">Iniciar sesión</a>
-            <a class="btn btn-dark" href="crear_cuenta.html">Crear cuenta ▸</a>
+            <a class="btn btn-light" id="loginLink" href="login.html">Iniciar sesión</a>
+            <a class="btn btn-dark" id="registerLink" href="login.html">Crear cuenta ▸</a>
+            <button class="btn btn-logout" id="logoutButton" type="button" hidden>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                    <path d="M10 17l5-5-5-5M15 12H3m9-8h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6" />
+                </svg>
+                <span>Cerrar sesión</span>
+            </button>
         </div>
     </header>
 
@@ -180,9 +186,80 @@
 
             applyDarkPalette();
 
+            const getAuthenticatedUser = () => {
+                const candidates = [
+                    localStorage.getItem('schedgrup-user'),
+                    localStorage.getItem('schedgrup-session'),
+                    sessionStorage.getItem('schedgrup-user'),
+                    sessionStorage.getItem('schedgrup-session')
+                ];
+
+                for (const candidate of candidates) {
+                    if (!candidate) continue;
+
+                    try {
+                        const parsed = JSON.parse(candidate);
+                        if (parsed && (parsed.email || parsed.username || parsed.id)) {
+                            return parsed;
+                        }
+                    } catch (error) {
+                        // Ignored: if the stored value is not JSON, it is treated as unauthenticated.
+                    }
+                }
+
+                return null;
+            };
+
+            const authenticatedUser = getAuthenticatedUser();
+            const loginLink = document.getElementById('loginLink');
+            const registerLink = document.getElementById('registerLink');
+            const logoutButton = document.getElementById('logoutButton');
+            loginLink.hidden = Boolean(authenticatedUser);
+            registerLink.hidden = Boolean(authenticatedUser);
+            logoutButton.hidden = !authenticatedUser;
+            logoutButton.addEventListener('click', () => {
+                [localStorage, sessionStorage].forEach((storage) => {
+                    storage.removeItem('schedgrup-user');
+                    storage.removeItem('schedgrup-session');
+                });
+                window.location.reload();
+            });
+
+            const getMealsStorageKey = () => {
+                const user = authenticatedUser;
+                if (!user) {
+                    return null;
+                }
+
+                return `schedgrupMeals:${user.email || user.username || user.id}`;
+            };
+
+            const loadMeals = () => {
+                const mealStorageKey = getMealsStorageKey();
+
+                if (!mealStorageKey) {
+                    localStorage.removeItem('schedgrupMeals');
+                    return [];
+                }
+
+                const storedMeals = localStorage.getItem(mealStorageKey);
+                return storedMeals ? JSON.parse(storedMeals) : [];
+            };
+
+            const persistMeals = (nextMeals) => {
+                const mealStorageKey = getMealsStorageKey();
+
+                if (!mealStorageKey) {
+                    localStorage.removeItem('schedgrupMeals');
+                    return;
+                }
+
+                localStorage.setItem(mealStorageKey, JSON.stringify(nextMeals));
+            };
+
             let selectedMeal = 'breakfast';
             let editingIndex = null;
-            let meals = JSON.parse(localStorage.getItem('schedgrupMeals') || '[]');
+            let meals = loadMeals();
 
             const updateSelectedMeal = (mealKey) => {
                 selectedMeal = mealKey;
@@ -271,12 +348,11 @@
                     });
                 }
 
-                localStorage.setItem('schedgrupMeals', JSON.stringify(meals));
+                persistMeals(meals);
                 renderMeals();
                 mealForm.reset();
                 foodInput.focus();
                 editingIndex = null;
-                updateSelectedMeal('breakfast');
             };
 
             mealForm.addEventListener('submit', (event) => {
