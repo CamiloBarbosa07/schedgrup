@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
+    color-scheme: light;
     --verde-oscuro: #173f35;
     --verde-medio: #2d5c4e;
     --verde-claro: #dfeee9;
@@ -20,6 +21,7 @@
 }
 
 body.dark-theme {
+    color-scheme: dark;
     --verde-oscuro: #9ac8a5;
     --verde-medio: #497254;
     --verde-claro: #223a2d;

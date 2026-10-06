@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=Dancing+Script:wght@400;500;600;700&display=swap');
 
 :root {
+    color-scheme: light;
     --topbar-space: 86px;
     --verde-oscuro: #173F35;
     --verde-claro: #dfeee9;
@@ -19,6 +20,7 @@
 }
 
 body.dark-theme {
+    color-scheme: dark;
     --verde-oscuro: #9ac8a5;
     --verde-claro: #223a2d;
     --blanco: #111b15;
@@ -40,6 +42,7 @@ body.dark-theme {
     --lunch-dark-text: #f0a084;
     --dinner-dark-bg: rgba(134, 164, 180, 0.24);
     --dinner-dark-text: #bad3df;
+    --meal-active-text: #111b15;
 }
 
 body.dark-theme[data-dark-palette="original"] {
@@ -64,6 +67,7 @@ body.dark-theme[data-dark-palette="original"] {
     --lunch-dark-text: #ff9e73;
     --dinner-dark-bg: rgba(61, 80, 107, 0.38);
     --dinner-dark-text: #add0ff;
+    --meal-active-text: #0f1720;
 }
 
 body.dark-theme[data-dark-palette="olive"] {
@@ -88,6 +92,7 @@ body.dark-theme[data-dark-palette="olive"] {
     --lunch-dark-text: #f2ad8e;
     --dinner-dark-bg: rgba(145, 170, 160, 0.22);
     --dinner-dark-text: #c1d5cc;
+    --meal-active-text: #191c13;
 }
 
 * {
@@ -1188,44 +1193,44 @@ body.dark-theme .type-option.dinner {
 
 body.dark-theme .type-trigger.breakfast,
 body.dark-theme .type-option.breakfast {
-    background: #fff1bf;
-    border-color: #f4b942;
-    color: #d79a00;
+    background: var(--breakfast-dark-bg);
+    border-color: var(--desayuno);
+    color: var(--breakfast-dark-text);
 }
 
 body.dark-theme .type-trigger.breakfast.is-active,
 body.dark-theme .type-trigger.breakfast:hover,
 body.dark-theme .type-option.breakfast.is-active,
 body.dark-theme .type-option.breakfast:hover {
-    background: #f4b942;
-    border-color: #f4b942;
-    color: #fff;
+    background: var(--desayuno);
+    border-color: var(--desayuno);
+    color: var(--meal-active-text);
 }
 
 body.dark-theme .type-option.lunch {
-    background: #ffe7dc;
-    border-color: #c96f4a;
-    color: #c65a2c;
+    background: var(--lunch-dark-bg);
+    border-color: var(--almuerzo);
+    color: var(--lunch-dark-text);
 }
 
 body.dark-theme .type-option.lunch.is-active,
 body.dark-theme .type-option.lunch:hover {
-    background: #c96f4a;
-    border-color: #c96f4a;
-    color: #fff;
+    background: var(--almuerzo);
+    border-color: var(--almuerzo);
+    color: var(--meal-active-text);
 }
 
 body.dark-theme .type-option.dinner {
-    background: #e9eefb;
-    border-color: #3d506b;
-    color: #2f5a98;
+    background: var(--dinner-dark-bg);
+    border-color: var(--cena);
+    color: var(--dinner-dark-text);
 }
 
 body.dark-theme .type-option.dinner.is-active,
 body.dark-theme .type-option.dinner:hover {
-    background: #3d506b;
-    border-color: #3d506b;
-    color: #fff;
+    background: var(--cena);
+    border-color: var(--cena);
+    color: var(--meal-active-text);
 }
 
 .sr-only {
