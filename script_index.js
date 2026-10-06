@@ -110,6 +110,86 @@ document.addEventListener('DOMContentLoaded', () => {
             let selectedMeal = 'breakfast';
             let editingIndex = null;
             let meals = loadMeals();
+            let previousSchedule = null;
+            let currentSchedule = null;
+            let selectedMealCell = null;
+            let draggedMealCell = null;
+
+            const shuffleMeals = (items) => {
+                const shuffled = [...items];
+                for (let index = shuffled.length - 1; index > 0; index -= 1) {
+                    const randomIndex = Math.floor(Math.random() * (index + 1));
+                    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+                }
+                return shuffled;
+            };
+
+            const clearMealCellSelection = () => {
+                selectedMealCell?.classList.remove('is-selected');
+                selectedMealCell?.setAttribute('aria-pressed', 'false');
+                selectedMealCell = null;
+            };
+
+            const updateScheduleCell = (cell) => {
+                const { mealType, dayIndex } = cell.dataset;
+                const meal = currentSchedule[mealType][Number(dayIndex)];
+                const label = MEAL_TYPES[mealType].label;
+                const mealName = meal?.name || 'Sin asignar';
+
+                cell.querySelector('.schedule-meal-name').textContent = mealName;
+                cell.draggable = Boolean(meal);
+                cell.setAttribute('aria-label', `${label}, ${mealName}. ${meal ? 'Selecciona para mover o arrastra a otro día de la misma categoría.' : 'Selecciona para recibir una comida de la misma categoría.'}`);
+                cell.title = meal
+                    ? 'Arrastra esta comida a otro día de la misma categoría o selecciónala y elige el día de destino.'
+                    : 'Selecciona esta celda como destino de una comida de la misma categoría.';
+            };
+
+            const swapScheduleCells = (sourceCell, targetCell) => {
+                if (
+                    !currentSchedule
+                    || sourceCell === targetCell
+                    || sourceCell.dataset.mealType !== targetCell.dataset.mealType
+                ) {
+                    return false;
+                }
+
+                const mealType = sourceCell.dataset.mealType;
+                const sourceIndex = Number(sourceCell.dataset.dayIndex);
+                const targetIndex = Number(targetCell.dataset.dayIndex);
+                const assignments = currentSchedule[mealType];
+                [assignments[sourceIndex], assignments[targetIndex]] = [assignments[targetIndex], assignments[sourceIndex]];
+                updateScheduleCell(sourceCell);
+                updateScheduleCell(targetCell);
+                sourceCell.classList.remove('is-drop-target', 'is-dragging');
+                targetCell.classList.remove('is-drop-target', 'is-dragging');
+                clearMealCellSelection();
+                draggedMealCell = null;
+                downloadStatus.textContent = 'Comidas intercambiadas dentro de su categoría.';
+                return true;
+            };
+
+            const selectScheduleCell = (cell) => {
+                if (!selectedMealCell) {
+                    if (!cell.draggable) {
+                        return;
+                    }
+                    selectedMealCell = cell;
+                    cell.classList.add('is-selected');
+                    cell.setAttribute('aria-pressed', 'true');
+                    downloadStatus.textContent = 'Ahora selecciona otro día de la misma categoría.';
+                    return;
+                }
+
+                if (cell === selectedMealCell) {
+                    clearMealCellSelection();
+                    downloadStatus.textContent = '';
+                    return;
+                }
+
+                if (!swapScheduleCells(selectedMealCell, cell)) {
+                    downloadStatus.textContent = 'Solo puedes mover comidas dentro de la misma categoría.';
+                }
+            };
 
             const updateSelectedMeal = (mealKey) => {
                 selectedMeal = mealKey;
@@ -219,9 +299,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
             createScheduleButton.addEventListener('click', () => {
                 const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+                const mealsByType = {};
+
+                Object.keys(MEAL_TYPES).forEach((mealType) => {
+                    const options = shuffleMeals(meals.filter((meal) => meal.type === mealType));
+                    let assignments = days.map((_, dayIndex) => options[dayIndex % options.length] || null);
+                    const previousAssignments = previousSchedule?.[mealType];
+
+                    if (
+                        options.length > 1
+                        && previousAssignments
+                        && assignments.every((meal, index) => meal === previousAssignments[index])
+                    ) {
+                        options.push(options.shift());
+                        assignments = days.map((_, dayIndex) => options[dayIndex % options.length]);
+                    }
+
+                    mealsByType[mealType] = assignments;
+                });
+
+                previousSchedule = mealsByType;
+                currentSchedule = mealsByType;
+                selectedMealCell = null;
+                draggedMealCell = null;
+                downloadStatus.textContent = '';
+
                 const scheduleTitle = document.createElement('h4');
                 scheduleTitle.className = 'schedule-title';
                 scheduleTitle.textContent = 'Horario semanal';
+                const scheduleInstructions = document.createElement('p');
+                scheduleInstructions.className = 'schedule-instructions';
+                scheduleInstructions.textContent = 'Arrastra una comida a otro día de la misma categoría o selecciónala y luego elige su destino para intercambiarlas.';
 
                 const scheduleHeader = document.createElement('div');
                 scheduleHeader.className = 'schedule-row schedule-header';
@@ -253,25 +361,72 @@ document.addEventListener('DOMContentLoaded', () => {
                     row.appendChild(dayLabel);
 
                     Object.entries(MEAL_TYPES).forEach(([mealType, { label }]) => {
-                        const options = meals.filter((meal) => meal.type === mealType);
                         const mealCell = document.createElement('div');
                         mealCell.className = `schedule-meal schedule-meal-${mealType}`;
+                        mealCell.dataset.mealType = mealType;
+                        mealCell.dataset.dayIndex = dayIndex;
                         const mealLabel = document.createElement('span');
                         mealLabel.className = 'schedule-meal-label';
                         mealLabel.textContent = label;
                         const mealName = document.createElement('span');
                         mealName.className = 'schedule-meal-name';
-                        mealName.textContent = options.length
-                            ? options[dayIndex % options.length].name
-                            : 'Sin asignar';
+                        mealName.textContent = mealsByType[mealType][dayIndex]?.name || 'Sin asignar';
                         mealCell.append(mealLabel, mealName);
+
+                        updateScheduleCell(mealCell);
+                        mealCell.tabIndex = 0;
+                        mealCell.setAttribute('role', 'button');
+                        mealCell.setAttribute('aria-pressed', 'false');
+                        mealCell.addEventListener('click', () => selectScheduleCell(mealCell));
+                        mealCell.addEventListener('keydown', (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                selectScheduleCell(mealCell);
+                            } else if (event.key === 'Escape') {
+                                clearMealCellSelection();
+                                downloadStatus.textContent = '';
+                            }
+                        });
+                        mealCell.addEventListener('dragstart', (event) => {
+                            if (!mealCell.draggable) {
+                                event.preventDefault();
+                                return;
+                            }
+                            draggedMealCell = mealCell;
+                            clearMealCellSelection();
+                            mealCell.classList.add('is-dragging');
+                            event.dataTransfer.effectAllowed = 'move';
+                        });
+                        mealCell.addEventListener('dragend', () => {
+                            mealCell.classList.remove('is-dragging');
+                            scheduleResult.querySelectorAll('.is-drop-target').forEach((cell) => {
+                                cell.classList.remove('is-drop-target');
+                            });
+                            draggedMealCell = null;
+                        });
+                        mealCell.addEventListener('dragover', (event) => {
+                            if (draggedMealCell && draggedMealCell.dataset.mealType === mealType) {
+                                event.preventDefault();
+                                event.dataTransfer.dropEffect = 'move';
+                                mealCell.classList.add('is-drop-target');
+                            }
+                        });
+                        mealCell.addEventListener('dragleave', () => {
+                            mealCell.classList.remove('is-drop-target');
+                        });
+                        mealCell.addEventListener('drop', (event) => {
+                            event.preventDefault();
+                            if (draggedMealCell) {
+                                swapScheduleCells(draggedMealCell, mealCell);
+                            }
+                        });
                         row.appendChild(mealCell);
                     });
 
                     return row;
                 });
 
-                scheduleResult.replaceChildren(scheduleTitle, scheduleHeader, ...scheduleRows);
+                scheduleResult.replaceChildren(scheduleTitle, scheduleInstructions, scheduleHeader, ...scheduleRows);
                 downloadScheduleButton.disabled = false;
                 downloadSchedulePngButton.disabled = false;
                 document.querySelectorAll('.main-nav .nav-link').forEach((navLink) => {

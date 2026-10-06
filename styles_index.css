@@ -936,6 +936,35 @@ body.dark-theme .topbar {
     font-weight: 600;
 }
 
+.schedule-meal[role="button"] {
+    cursor: pointer;
+}
+
+.schedule-meal[draggable="true"] {
+    cursor: grab;
+}
+
+.schedule-meal[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.schedule-meal:focus-visible,
+.schedule-meal.is-selected,
+.schedule-meal.is-drop-target {
+    outline: 2px solid var(--verde-oscuro);
+    outline-offset: 2px;
+}
+
+.schedule-meal.is-dragging {
+    opacity: 0.5;
+}
+
+.schedule-instructions {
+    margin: -8px 0 16px;
+    color: var(--gris);
+    font-size: 0.85rem;
+}
+
 .schedule-meal-breakfast {
     border-left-color: var(--desayuno);
     background: color-mix(in srgb, var(--desayuno) 14%, var(--panel));
@@ -1551,6 +1580,10 @@ body.dark-theme .type-option.dinner:hover {
         color: #17231b !important;
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
+    }
+
+    #horario .schedule-instructions {
+        display: none;
     }
 
     #horario .schedule-meal-breakfast {
