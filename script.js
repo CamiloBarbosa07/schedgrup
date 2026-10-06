@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const savedDarkPalette = localStorage.getItem('schedgrup-dark-palette');
             let darkPaletteIndex = DARK_PALETTES.indexOf(savedDarkPalette);
             if (darkPaletteIndex < 0) {
-                darkPaletteIndex = 0;
+                darkPaletteIndex = 1;
             }
 
             const applyDarkPalette = () => {
@@ -36,23 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             applyDarkPalette();
-
-            document.addEventListener('keydown', (event) => {
-                const target = event.target;
-                const isTextEntry = target instanceof HTMLElement
-                    && (target.isContentEditable
-                        || target.matches('textarea, select')
-                        || (target instanceof HTMLInputElement
-                            && !['checkbox', 'radio', 'button', 'submit', 'reset'].includes(target.type)));
-
-                if (event.key.toLowerCase() !== 'v' || event.repeat || event.ctrlKey || event.altKey || event.metaKey
-                    || isTextEntry || !document.body.classList.contains('dark-theme')) {
-                    return;
-                }
-
-                darkPaletteIndex = (darkPaletteIndex + 1) % DARK_PALETTES.length;
-                applyDarkPalette();
-            });
 
             let selectedMeal = 'breakfast';
             let editingIndex = null;
