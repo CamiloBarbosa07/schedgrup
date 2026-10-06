@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedgrup</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 class="logo">Schedgrup</h1>
+
+        <nav>
+                <a class="navegacion" href="inicio.html">Inicio</a>
+                <a class="navegacion" href="aplicacion.html">Aplicación</a>
+                <a class="navegacion" href="información.html">Información</a>
+                <a class="navegacion" href="Creador.html">Creador</a>
+
+                <a class="inicio_sesion" href="inicio_sesión.html">Iniciar sesión</a>
+                <a class="crear_cuenta" href="crear_cuenta.html">Crear cuenta ▸</a>
+        </nav>
+
+    </header>
+
+    <section class="encabezado">
+
+        <h2 class="slogan"><strong>Organiza Tu <span style="color: #173F35;">Semana</span><br>De <span style="color: #173F35;">Manera</span> Eficiente</strong></h2>
+
+        <p class="slogan_descripcion">Optimiza tu rutina diaria con nuestra web de planificación basada en platos. 
+            Organiza tu calendario semanal de comidas, equilibra tus nutrientes,<br> estructura tus tiempos de cocina 
+            y mejora tu productividad en el hogar de forma gratuita y completamente personalizada.</p>
+
+        <div class="ordenar_boton">
+            <a class="slogan_boton" href="aplicacion.html">Comenzar</a>
+            <a class="slogan_boton2" href="creador.html">Creador  ▸</a>
+        </div>
+
+    </section>
+
+    <section class="aplicacion">
+
+        <h1 class="aplicacion_titulo">Schedgrup</h1>
+
+        <div class="aplicacion_seccion">
+
+            <div class="aplicacion_contenedor">
+
+                <h2 class="aplicacion_subtitulo">Agregar Comida</h2>
+
+                <form>
+
+                    <input class="aplicacion_input"
+                        type="text"
+                        id="nombre"
+                        placeholder="Nombre De La Comida">
+
+                </form>
+
+                    <label class="aplicacion_selector_label" id="Desayuno">
+                        <input type="radio" name="tipo" value="desayuno" >
+                            Desayuno
+                    </label>
+                
+                    <label class="aplicacion_selector_label" id="Almuerzo">
+                        <input type="radio" name="tipo" value="almuerzo" >
+                            Almuerzo
+                    </label>
+                
+                    <label class="aplicacion_selector_label" id="Cena">
+                        <input type="radio" name="tipo" value="cena" >
+                            Cena
+                    </label>
+
+            </div>
+
+            <div class="aplicacion_selector">
+                
+               <label class="aplicacion_selector_label" name="tipo" value="desayuno" id="Desayuno">
+                    <input type="radio">
+                        Desayuno
+                </label>
+            
+                <label class="aplicacion_selector_label" name="tipo" value="almuerzo" id="Almuerzo">
+                    <input type="radio">
+                        Almuerzo
+                </label>
+            
+                <label class="aplicacion_selector_label" name="tipo" value="cena" id="Cena">
+                    <input type="radio">
+                        Cena
+                </label>
+ 
+            </div>
+        
+        </div>
+
+    </section>
+
+</body>
+</html>
